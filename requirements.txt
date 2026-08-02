@@ -1,6 +1,6 @@
-
 streamlit
-yfinance
-plotly
+finnhub-python
 pandas
 numpy
+plotly
+
