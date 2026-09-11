@@ -7,7 +7,7 @@ from datetime import datetime
 
 # 1. إعدادات الصفحة الأساسية
 st.set_page_config(
-    page_title="ProofOfEdge | Quant Strategy Testing & Proof",
+    page_title="ProofOfEdge | Quant Strategy & Numeric Targets",
     page_icon="🛡️",
     layout="wide"
 )
@@ -63,8 +63,8 @@ def get_live_market_price(ticker_symbol):
     return 0.0
 
 # 3. واجهة المنصة الرئيسية
-st.title("🛡️ ProofOfEdge — خلاصة الرصد الكمي واختبار الاستراتيجيات")
-st.caption("منصة موثقة رقمياً لقياس أداء الاستراتيجيات، القضاء على العشوائية، وبناء السجل التاريخي الحقيقي للمحلل.")
+st.title("🛡️ ProofOfEdge — منصة التوثيق الكمي بالأهداف السعرية الرقمية")
+st.caption("نظام احترافي يعتمد على الأرقام، المستويات، وأسعار التنفيذ اللحظية بعيداً عن التسميات العشوائية.")
 
 # شريط الأسعار الحية في الأعلى
 c1, c2, c3 = st.columns(3)
@@ -78,76 +78,107 @@ st.markdown("---")
 # تحميل البروفايلات المسجلة
 profiles = load_profiles()
 
-# 4. الشريط الجانبي (لوحة التحكم والإدارة)
+# 4. الشريط الجانبي (لوحة التحكم التنفيذية)
 with st.sidebar:
-    st.header("⚙️ لوحة التحكم")
+    st.header("⚙️ لوحة التحكم التنفيذية")
     
-    action_mode = st.radio("اختر العملية:", ["توثيق واختبار إشارة", "تسجيل / تحديث بروفايل محلل"])
+    action_mode = st.radio("اختر القسم:", ["إرسال استراتيجية / هدف رقمي جديد", "تسجيل أو تحديث بروفايل محلل"])
     
-    if action_mode == "تسجيل / تحديث بروفايل محلل":
-        st.subheader("👤 هوية المحلل واستراتيجيته")
+    if action_mode == "تسجيل أو تحديث بروفايل محلل":
+        st.subheader("👤 ملف المحلل والاستراتيجية")
         
-        # حقول إدخال نظيفة ومباشرة لضمان الاستقرار
-        new_handle = st.text_input("معرفك الفريد (مثال: AbuSaeed_Quant)").strip()
-        bio_text = st.text_area("نبذة تعريفية عنك")
-        strategy_desc = st.text_area("شرح الاستراتيجية الكمية (مثل: GEX Zero Gamma & Call Walls)")
+        new_handle = st.text_input("معرفك الفريد (مثال: AbuSaeed)").strip()
+        bio_text = st.text_area("نبذة تعريفية عنك أو عن نشاطك")
+        strategy_desc = st.text_area("تفاصيل الاستراتيجية الكمية (مثل: GEX & Call Walls مع شروط الرصد)")
         custom_secret = st.text_input("مفتاحك السري الخاص (Secret Key)", type="password")
         
-        if st.button("💾 حفظ البروفايل وإنشاء الهوية"):
+        if st.button("💾 حفظ البروفايل واعتماد الهوية"):
             if new_handle and custom_secret:
                 save_profile(new_handle, bio_text, strategy_desc, custom_secret)
-                st.success(f"✅ تم حفظ البروفايل للمحلل @{new_handle} بنجاح!")
+                st.success(f"✅ تم حفظ بروفايل المحلل @{new_handle} بنجاح!")
             else:
                 st.error("❌ الرجاء إدخال المعرف والمفتاح السري على الأقل.")
     
     else:
-        st.subheader("⚡ توثيق إشارة / اختبار استراتيجية")
-        st.warning("⚠️ يتم توثيق السعر ووقت النظام لحظياً لمنع أي تلاعب أو تعديل بأثر رجعي.")
+        st.subheader("⚡ توثيق هدف رقمي واستراتيجية")
+        st.warning("⚠️ يتم توثيق السعر ووقت النظام لحظياً، ويتم استنتاج اتجاه الصفقة تلقائياً من الهدف الرقمي.")
         
-        registered_handles = list(profiles.keys()) if profiles else ["QuantBot_v1"]
-        trader_handle = st.selectbox("معرف المتداول المسجل", registered_handles)
+        registered_handles = list(profiles.keys()) if profiles else ["محلل_عام"]
+        trader_handle = st.selectbox("اختر اسم المحلل المسجل", registered_handles)
         
-        verification_code = st.text_input("رمز توثيق الخوارزمية (Secret Key)", type="password")
+        verification_code = st.text_input("رمز توثيق المحلل (Secret Key)", type="password")
         
         symbol = st.selectbox("الأصل المالي", ["SPX", "TSLA", "NVDA"])
-        signal_type = st.selectbox("نوع الإشارة / النموذج الكمي", ["GEX Zero Gamma Rejection", "Call Wall Resistance", "Put Wall Support"])
-        direction = st.selectbox("الاتجاه", ["Call / Bullish 🟢", "Put / Bearish 🔴"])
+        signal_type = st.text_input("اسم النموذج أو الأداة (مثال: GEX Zero Gamma Rejection)")
         
         live_p = get_live_market_price(symbol)
         st.info(f"سعر التنفيذ اللحظي الموثق: **${live_p}**")
         
-        if st.button("🚀 اعتماد وتوثيق الصفقة بالسجل"):
+        # إدخال الهدف السعري الرقمي الصريح بدلاً من اختيار كول أو بوت
+        target_price = st.number_input(
+            "الهدف السعري الرقمي المستهدف (Target Price)", 
+            value=float(live_p + 10.0) if live_p > 0 else 0.0,
+            step=0.25,
+            format="%.2f"
+        )
+        
+        confirmation_notes = st.text_area("توقيت التأكيد وشروط الاستراتيجية", placeholder="مثال: تم إعطاء التأكيد فور ثبات السعر فوق مستوى السيولة مع حجم تداول عالٍ")
+        
+        if st.button("🚀 اعتماد ونشر الهدف بالسجل العام"):
             stored_profile = profiles.get(trader_handle, {})
             expected_secret = stored_profile.get("secret_key", "2222")
             
-            # التحقق من صحة المفتاح السري للخوارزمية أو البروفايل
             is_verified = (verification_code == expected_secret) and (verification_code != "")
+            
+            # استنتاج الاتجاه برمجيًا بناءً على مقارنة الهدف بسعر الدخول
+            if target_price > live_p:
+                inferred_direction = "صاعد (Bullish Target) 🟢"
+            elif target_price < live_p:
+                inferred_direction = "هابط (Bearish Target) 🔴"
+            else:
+                inferred_direction = "حيادي (Neutral) ⚪"
             
             new_signal = {
                 "trader": f"@{trader_handle}",
                 "symbol": symbol,
                 "entry_price": live_p,
-                "signal_type": signal_type,
-                "direction": direction,
+                "signal_type": signal_type if signal_type else "هدف كمي معتمد",
+                "target_price": target_price,
+                "direction": inferred_direction,
+                "confirmation_notes": confirmation_notes,
                 "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "verified": is_verified,
-                "status_text": "إشارة خوارزمية موثقة ✅" if is_verified else "اختبار يدوي مؤمن ⚠️"
+                "status_text": "هدف خوارزمي موثق ✅" if is_verified else "اختبار رقمي مؤمن ⚠️"
             }
             
             save_signal(new_signal)
             if is_verified:
-                st.success("✅ تم توثيق الاعتماد في السجل التاريخي بنجاح!")
+                st.success("✅ تم توثيق الهدف الرقمي ونشره في السجل التاريخي بنجاح!")
             else:
-                st.error("⚠️ تم التوثيق كـ (اختبار يدوي) لعدم مطابقة مفتاح الخوارزمية.")
+                st.error("⚠️ تم النشر كـ (اختبار رقمي) لعدم مطابقة مفتاح الخوارزمية.")
             st.rerun()
 
-# 5. الواجهة الرئيسية - الخلاصة الحية وسجل الأداء الموثق
-st.subheader("📡 السجل التاريخي الحقيقي لاختبارات الأداء (Verified Track Record)")
+# 5. الواجهة الرئيسية - قسم عرض البروفايلات وسجل الأداء الموثق
+st.subheader("👥 دليل المحللين واستراتيجياتهم المسجلة")
+if profiles:
+    profile_cols = st.columns(min(len(profiles), 3))
+    for idx, (hname, hdata) in enumerate(profiles.items()):
+        col_idx = idx % 3
+        with profile_cols[col_idx]:
+            with st.container(border=True):
+                st.markdown(f"### 👤 @{hname}")
+                st.markdown(f"**نبذة:** {hdata.get('bio', 'لا توجد نبذة')}")
+                st.markdown(f"**الاستراتيجية:** {hdata.get('strategy', 'غير محددة')}")
+else:
+    st.info("لا توجد بروفايلات مسجلة حتى الآن. قم بإنشاء هويتك من القائمة الجانبية.")
+
+st.markdown("---")
+st.subheader("📡 السجل التاريخي الحقيقي لاختبارات الأداء والأهداف الرقمية (Verified Track Record)")
 
 signals = load_signals()
 
 if not signals:
-    st.info("لا توجد إشارات مسجلة حتى الآن. ابدأ بتوثيق أول اختبار استراتيجية لك بالأرقام!")
+    st.info("لا توجد إشارات مسجلة حتى الآن. ابدأ بتوثيق أول هدف رقمي لك بالأرقام!")
 else:
     for sig in signals:
         with st.container(border=True):
@@ -156,28 +187,43 @@ else:
             trader_name = sig.get('trader')
             symbol = sig.get('symbol')
             entry_price = sig.get('entry_price')
+            target_price = sig.get('target_price', 0.0)
             direction = sig.get('direction')
             
             col_a.markdown(f"**المتداول:** `{trader_name}`")
-            col_b.markdown(f"**الأصل:** `{symbol}` @ سعر التنفيذ: **${entry_price}**")
-            col_c.markdown(f"**الاتجاه:** {direction}")
+            col_b.markdown(f"**الأصل:** `{symbol}` @ الدخول: **${entry_price}**")
+            col_c.markdown(f"**الهدف الرقمي:** **${target_price}** ({direction})")
             
-            st.markdown(f"🎯 **النموذج / الإشارة:** `{sig.get('signal_type')}`")
+            st.markdown(f"🎯 **النموذج / الأداة:** `{sig.get('signal_type')}`")
             
-            # مقارنة السعر اللحظي الحالي بسعر الدخول لتقييم حركة الأداء بموضوعية
+            if sig.get('confirmation_notes'):
+                st.markdown(f"📝 **توقيت التأكيد والشروط:** {sig.get('confirmation_notes')}")
+            
+            # تقييم حركة السعر اللحظي مقارنة بسعر الدخول والهدف المحدد رقمياً
             current_market_price = get_live_market_price(symbol)
-            if entry_price > 0 and current_market_price > 0:
+            if entry_price > 0 and current_market_price > 0 and target_price > 0:
                 price_diff = round(current_market_price - entry_price, 2)
-                is_bullish = "Bullish" in direction or "🟢" in direction
+                is_target_higher = target_price > entry_price
                 
-                if is_bullish:
-                    perf_eval = "📈 في مسار إيجابي (صاعد لصالح الاتجاه)" if price_diff > 0 else ("⏳ نقطة الحياد الحالية" if price_diff == 0 else "📉 في مسار سلبي (هابط عكس الاتجاه)")
+                # تقييم مدى الاقتراب من الهدف أو تحقيقه
+                if is_target_higher:
+                    if current_market_price >= target_price:
+                        target_status = "🎯 تم تحقيق الهدف الرقمي بنجاح! ✅"
+                    elif current_market_price > entry_price:
+                        target_status = "📈 في مسار إيجابي نحو الهدف"
+                    else:
+                        target_status = "📉 تحت سعر الدخول (في مسار سلبي)"
                 else:
-                    perf_eval = "📈 في مسار إيجابي (هابط لصالح الاتجاه)" if price_diff < 0 else ("⏳ نقطة الحياد الحالية" if price_diff == 0 else "📉 في مسار سلبي (صاعد عكس الاتجاه)")
+                    if current_market_price <= target_price:
+                        target_status = "🎯 تم تحقيق الهدف الرقمي بنجاح! ✅"
+                    elif current_market_price < entry_price:
+                        target_status = "📈 في مسار إيجابي نحو الهدف"
+                    else:
+                        target_status = "📉 فوق سعر الدخول (في مسار سلبي)"
                 
-                st.markdown(f"📊 **السعر اللحظي الآن:** `${current_market_price}` | **الفارق الكمي:** `{price_diff:+.2f}$` | **الحالة:** **{perf_eval}**")
+                st.markdown(f"📊 **السعر اللحظي الآن:** `${current_market_price}` | **الفارق عن الدخول:** `{price_diff:+.2f}$` | **حالة الهدف:** **{target_status}**")
             
-            # استدعاء وعرض نبذة واستراتيجية المحلل المرتبط بالبطاقة
+            # عرض بروفايل المحلل أسفل البطاقة بدقة
             clean_handle = trader_name.replace("@", "").strip()
             profile_data = profiles.get(clean_handle, {})
             
