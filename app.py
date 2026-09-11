@@ -54,7 +54,7 @@ st.title("🛡️ ProofOfEdge — Quantitative Social Platform")
 st.caption("شبكة التواصل الأولى المعتمدة على توثيق الأداء الكمي وإثبات خوارزميات التدفق (Proof of Quant Edge)")
 st.markdown("---")
 
-# 4. الشريط الجانبي - الملف الشخصي للمتداول su2su
+# 4. الشريط الجانبي - الملف الشخصي ونموذج النشر السريع
 with st.sidebar:
     st.image("https://img.icons8.com/fluency/96/guarantee.png", width=70)
     st.header("👤 ملف المتداول الكمي")
@@ -72,10 +72,37 @@ with st.sidebar:
     
     st.info("💡 يتم تحديث الـ Quant Score تلقائياً عبر نتائج التحليلات المربوطة بالـ API.")
 
-# 5. الجسم الرئيسي: خلاصة التحليلات الموثقة بالتحديث الآلي
+    st.markdown("---")
+    st.subheader("⚡ نشر إشارة تحليلية سريعة")
+    with st.form("publish_signal_form"):
+        symbol_input = st.selectbox("الأصل", ["SPX", "TSLA", "NVDA", "AAPL"])
+        signal_input = st.text_input("نوع الإشارة", "GEX Zero Gamma Rejection")
+        price_input = st.text_input("السعر اللحظي", "5510.50")
+        details_input = st.text_area("تفاصيل الحركة الهيكلية", "اختراق مستوى جاما مرتفع مع زيادة تدفق أومر الشراء.")
+        
+        submit_btn = st.form_submit_button("🚀 نشر البطاقة التحليلية")
+        
+        if submit_btn:
+            new_card = {
+                "trader": f"@{trader_handle}",
+                "symbol": symbol_input,
+                "time": datetime.now().strftime("%H:%M:%S"),
+                "signal": signal_input,
+                "price": price_input,
+                "quant_score": quant_score,
+                "details": details_input,
+                "status": "Verified via Live Publisher ✅"
+            }
+            current_signals = load_signals()
+            current_signals.insert(0, new_card)
+            with open(DATA_FILE, "w", encoding="utf-8") as f:
+                json.dump(current_signals, f, ensure_ascii=False, indent=4)
+            st.success("تم نشر البطاقة التحليلية بنجاح على المنصة!")
+            st.rerun()
+
+# 5. الجسم الرئيسي: خلاصة التحليلات الموثقة
 st.subheader("📡 خلاصة التحليلات والبطاقات الحية (Live Verified Feed)")
 
-# تحديث آلي للواجهة لتنعكس الإشارات القادمة فوراً
 signals_list = load_signals()
 
 for card in signals_list:
@@ -99,7 +126,6 @@ with tab1:
     st.markdown("### غرفة مراقبة تدفق سيولة SPX")
     st.write("تعرض هذه الغرفة التحليلات المعتمدة فقط للمتداولين الذين يتجاوز Quant Score الخاص بهم 85.0")
     
-    # رسم بياني توضيحي لمستويات السيولة والجاما
     chart_data = pd.DataFrame({
         'Strike Price': [5400, 5425, 5450, 5475, 5500],
         'Gamma Exposure (GEX)': [-120, 45, 310, 180, -90]
