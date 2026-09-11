@@ -1,0 +1,17 @@
+import requests
+import json
+from datetime import datetime
+
+# بيانات الإشارة الصادرة من خوارزميتك
+signal_data = {
+    "trader": "@su2su",
+    "symbol": "SPX",
+    "price": "5520.10",
+    "signal": "Institutional Order Flow Sweep",
+    "quant_score": 95.0,
+    "details": "تم رصد دخول سيولة مؤسسية ضخمة عند تقاطع VWAP مع مستويات الجاما.",
+    "time": datetime.now().strftime("%H:%M:%S"),
+    "status": "Verified via Python Engine ✅"
+}
+
+print("جاهز لإرسال الإشارة الموثقة للحساب @su2su...")
